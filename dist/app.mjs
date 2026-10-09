@@ -195,7 +195,7 @@ async function askAI(f) {
   const current = generation;
   const button = $("explain-ai");
   button.disabled = true;
-  button.textContent = "Local model is thinking…";
+  button.textContent = "Generating local explanation…";
   $("ai-answer").textContent = "";
   try {
     const response = await fetch("/api/explain", {

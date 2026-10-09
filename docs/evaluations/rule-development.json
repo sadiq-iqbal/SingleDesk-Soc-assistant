@@ -1,0 +1,207 @@
+{
+  "suite": "Synthetic development examples v1",
+  "provenance": "Hand-authored synthetic scenarios. Expected rule labels describe which activity an analyst should review, using the scenario context. Not independent or representative of production traffic.",
+  "unit": "One case × one rule label; multiple alerts with the same rule in a case count once.",
+  "caseCount": 12,
+  "exactMatches": 10,
+  "totals": {
+    "tp": 7,
+    "fp": 1,
+    "fn": 1,
+    "tn": 27,
+    "precision": 0.875,
+    "recall": 0.875,
+    "f1": 0.875
+  },
+  "perRule": [
+    {
+      "id": "AUTH-001",
+      "name": "Repeated login failures",
+      "tp": 3,
+      "fp": 1,
+      "fn": 1,
+      "tn": 7,
+      "precision": 0.75,
+      "recall": 0.75,
+      "f1": 0.75
+    },
+    {
+      "id": "AUTH-002",
+      "name": "Possible password spraying",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "tn": 11,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    {
+      "id": "AUTH-003",
+      "name": "Success after repeated failures",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 9,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    }
+  ],
+  "cases": [
+    {
+      "id": "D01",
+      "name": "Ordinary successful sign-ins",
+      "expected": [],
+      "actual": [],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "No failures."
+    },
+    {
+      "id": "D02",
+      "name": "A corrected password",
+      "expected": [],
+      "actual": [],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Two mistakes followed by success; below the review threshold."
+    },
+    {
+      "id": "D03",
+      "name": "Rapid attempts on one account",
+      "expected": [
+        "AUTH-001"
+      ],
+      "actual": [
+        "AUTH-001"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Five failures within five minutes."
+    },
+    {
+      "id": "D04",
+      "name": "Failures followed by success",
+      "expected": [
+        "AUTH-003"
+      ],
+      "actual": [
+        "AUTH-003"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Investigate the successful session; compromise is not assumed."
+    },
+    {
+      "id": "D05",
+      "name": "Multiple accounts from one source",
+      "expected": [
+        "AUTH-002"
+      ],
+      "actual": [
+        "AUTH-002"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Five distinct accounts in a short period."
+    },
+    {
+      "id": "D06",
+      "name": "Mixed repeated failures and success",
+      "expected": [
+        "AUTH-001",
+        "AUTH-003"
+      ],
+      "actual": [
+        "AUTH-003",
+        "AUTH-001"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Two different rule labels are expected."
+    },
+    {
+      "id": "D07",
+      "name": "Separate sources, unrelated accounts",
+      "expected": [],
+      "actual": [],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Events must not be merged into a spray from one source."
+    },
+    {
+      "id": "D08",
+      "name": "Successful session from a different source",
+      "expected": [],
+      "actual": [],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "Success correlation requires the same source and account."
+    },
+    {
+      "id": "D09",
+      "name": "Known benign maintenance retries",
+      "expected": [],
+      "actual": [
+        "AUTH-001"
+      ],
+      "falsePositives": [
+        "AUTH-001"
+      ],
+      "falseNegatives": [],
+      "match": false,
+      "note": "Intentional false-positive example: maintenance context is known to the labeler but absent from the logs."
+    },
+    {
+      "id": "D10",
+      "name": "Slow attempts requiring review",
+      "expected": [
+        "AUTH-001"
+      ],
+      "actual": [],
+      "falsePositives": [],
+      "falseNegatives": [
+        "AUTH-001"
+      ],
+      "match": false,
+      "note": "Intentional miss: the labelled suspicious sequence is too slow for the current five-minute rule."
+    },
+    {
+      "id": "D11",
+      "name": "Failures spanning midnight",
+      "expected": [
+        "AUTH-003"
+      ],
+      "actual": [
+        "AUTH-003"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "UTC dates must be retained when events cross midnight."
+    },
+    {
+      "id": "D12",
+      "name": "IPv6 source",
+      "expected": [
+        "AUTH-001"
+      ],
+      "actual": [
+        "AUTH-001"
+      ],
+      "falsePositives": [],
+      "falseNegatives": [],
+      "match": true,
+      "note": "IPv6 is handled the same way as IPv4."
+    }
+  ]
+}

@@ -2,6 +2,17 @@
 
 A portfolio application for investigating authentication logs. It combines deterministic detection rules, evidence-linked explanations, analyst review notes, reproducible evaluation, and an optional local Ollama model. There is no payment system, subscription, paid API, or required API key.
 
+**Status:** working prototype with 21 automated checks, browser verification, and recorded real `qwen3.5:4b` tests. Thinking is disabled. The model tests exposed incorrect counts and time spans; citation validation alone is not a factual-accuracy guarantee. See [actual results and limitations](docs/EVALUATION.md).
+
+## Get the project
+
+```sh
+git clone https://github.com/sadiq-iqbal/SingleDesk-Soc-assistant.git
+cd SingleDesk-Soc-assistant
+```
+
+The GitHub repository is named `SingleDesk-Soc-assistant`; the application's display name is SignalDesk.
+
 ## Run
 
 Requires Node.js 20 or later. No dependency installation is needed.
@@ -21,6 +32,10 @@ ollama pull qwen3:1.7b
 ```
 
 Start Ollama, run this application's companion server with `npm start`, then choose **Local AI settings → Check connection**. Select an installed model and use **Explain with local AI** on an alert. Smaller models are appropriate for machines with limited memory; response speed depends on hardware. Nothing downloads automatically.
+
+Thinking is explicitly disabled (`think: false`), including for models whose default is thinking on. The assistant uses only the final answer. Your installed `qwen3.5:4b` model is detected through Ollama's installed-model list; no additional model download is needed.
+
+For a repeatable real-model smoke test, run `npm run evaluate:llm -- qwen3.5:4b`. It tests three synthetic findings sequentially and saves prompts, final answers, citation-check results, and timings in `artifacts/real-model-smoke.json`. This can take several minutes on a CPU. The command is separate from the automated tests and does not measure factual accuracy; each response requires review.
 
 The hosted static version provides the complete rule-based workflow. Local LLM explanations require the local Node companion and Ollama; the hosted site cannot reach a server running on your computer through its own `/api` route. Local AI is never represented as connected until the models endpoint succeeds.
 
@@ -87,4 +102,27 @@ The runner saves the input and results in `artifacts/evaluation-results.json`. S
 
 ## Portfolio research extension
 
-Start with the supplied examples, then create an independently labelled held-out set. Compare rule output and AI explanations. Report alert precision/recall separately from explanation accuracy and unsupported-claim rate. The automated checks verify behavior, not real-world detection accuracy. Do not claim model-generated results before evaluating a real local model.
+Start with the supplied examples, then create an independently labelled held-out set. Compare rule output and AI explanations. Report alert precision/recall separately from explanation accuracy and unsupported-claim rate. The automated checks verify behavior, not real-world detection accuracy. The committed real-model runs are small development experiments; they are not a held-out benchmark.
+
+## Documentation
+
+- [Architecture, data flow, API, and rule behavior](docs/ARCHITECTURE.md)
+- [Evaluation method, actual results, and model mistakes](docs/EVALUATION.md)
+- [Verification record](docs/VERIFICATION.md)
+- [Prerequisite knowledge and demonstration guide](docs/LEARNING-GUIDE.md)
+- [Portfolio proof checklist](docs/PROVE-YOUR-PROJECT.md)
+
+## Troubleshooting
+
+| Problem | Next step |
+|---|---|
+| Local AI is unavailable | Start Ollama, run `npm run doctor`, and check the installed model list. |
+| The hosted page cannot connect to Ollama | Run `npm start` and use the local URL. The hosted site only provides browser-based features. |
+| A response takes a long time | CPU-only inference took about 75–103 seconds in the recorded runs. Wait for completion; avoid parallel model jobs. |
+| Evidence references are rejected | Use the built-in explanation and inspect the saved model response. Do not remove the validator to make an invalid answer appear supported. |
+| Notes disappeared | Notes are session-only and reset on reanalysis or reload. Export the report before replacing the input. |
+| No findings appear | Check input validity and rule thresholds. Absence of these three patterns is not proof of safety. |
+
+## Contribution and research claims
+
+This prototype was built with AI coding assistance. The student should document personal changes, experiments, and conclusions and be able to explain the implementation. It uses a pretrained model for inference; it does not train a model. The project does not claim production readiness, original research, or guaranteed internship selection.

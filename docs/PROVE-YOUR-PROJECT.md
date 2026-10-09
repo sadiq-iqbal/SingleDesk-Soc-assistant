@@ -4,14 +4,16 @@
 
 - Working authentication-log investigation tool with three documented detection rules.
 - Evidence references, raw log inspection, analyst notes, and downloadable investigation reports.
-- Optional local Ollama integration; automated integration checks use controlled mock model responses.
+- Optional local Ollama integration; automated checks use controlled mock responses, and separate real `qwen3.5:4b` runs are recorded in [the evaluation report](EVALUATION.md). Thinking is disabled.
 - A reproducible synthetic development evaluation plus support for importing your own labelled cases.
 
-These show implementation progress. They do not establish real-world security effectiveness, original research, or successful LLM evaluation.
+These show implementation and real-model test progress. They do not establish real-world security effectiveness, original research, or reliable model accuracy. The real tests exposed factual errors despite valid evidence references.
 
 ## What to install
 
 Node.js 20+ runs the app. Node.js was already present in this workspace when checked. There are no runtime dependencies to install.
+
+Current local setup: Ollama is running and `qwen3.5:4b` is installed. You do not need to download another model to use the assistant.
 
 For AI explanations, install Ollama: https://ollama.com/download/windows. Then download one model, such as `ollama pull qwen3:1.7b` as a smaller starting option or `ollama pull qwen3:4b` if your hardware can support it. Download size and runtime memory differ; response speed depends on your machine. No model is downloaded automatically. Official model information: https://ollama.com/library/qwen3.
 

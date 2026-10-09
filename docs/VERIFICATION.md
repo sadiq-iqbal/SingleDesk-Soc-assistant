@@ -2,9 +2,9 @@
 
 ## Automated checks
 
-`npm test`: 20 tests passed. These cover input parsing and rejection, inclusive time windows, account/source correlation, evidence ordering, IPv6 normalization, midnight timestamps, reset after successful authentication, evaluation arithmetic, suite validation, local API origin controls, server-derived evidence, and rejection of fabricated model citations.
+`npm test`: 21 tests passed. These cover input parsing and rejection, inclusive time windows, account/source correlation, evidence ordering, IPv6 normalization, midnight timestamps, reset after successful authentication, evaluation arithmetic, suite validation, local API origin controls, server-derived evidence, reasoning disabled despite caller input, explicit citation groups, and rejection of unknown or ambiguous references.
 
-The Ollama integration tests use controlled mock responses. No real model was evaluated during this verification.
+Automated API tests use controlled mock responses. Separate real runs evaluated `qwen3.5:4b` on three synthetic findings before and after a citation-format fix. All revised calls completed, but two answers contained factual mistakes. See [the evaluation record](EVALUATION.md) and its saved outputs.
 
 `node tests/browser-check.mjs`: passed in headless Microsoft Edge. The check covers sample analysis, severity and event filters, raw evidence, malformed inputs, file upload, JSON and Markdown report downloads, preservation of analyst notes when switching findings, evaluation metrics and invalid imports, case inspection, navigation, and safe rendering of log text.
 
@@ -18,6 +18,6 @@ Labels represent desired review decisions at the case/rule level. The intentiona
 
 ## Prerequisites and remaining work
 
-`npm run doctor`: Node.js v24.13.1 and application files are available. Ollama was not reachable at its local endpoint. Its installation status was not established by this check.
+`npm run doctor`: Node.js v24.13.1 and application files are available. After the user installed Ollama and `qwen3.5:4b`, the local service was reachable and reported that model. A browser check confirmed the model was selected, the explanation action was enabled, and the interface showed thinking off.
 
-Remaining evidence: an independently labelled frozen test set, real local-model responses, manual assessment of supported and unsupported claims, saved measurements, a short demonstration, and a report explaining the author's contributions and limitations. Follow [the portfolio proof checklist](PROVE-YOUR-PROJECT.md).
+Remaining evidence: an independently labelled frozen test set, independent human assessment of supported and unsupported claims, repeated measurements, a short demonstration, and the student's report explaining personal contributions and limitations. Follow [the portfolio proof checklist](PROVE-YOUR-PROJECT.md).

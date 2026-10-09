@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { createApp } from "../server.mjs";
+import { createApp, evidenceCitations } from "../server.mjs";
 import { sampleLogs } from "../dist/core.mjs";
 async function app(t, mock) {
   const server = createApp({ ollamaFetch: mock });
@@ -52,10 +52,14 @@ test("local model receives server-derived normalized evidence and returns cited 
       text: sampleLogs(),
       alertId: "F1",
       model: "test-model",
+      think: true,
     }),
   });
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).verified, false);
+  const output = await response.json();
+  assert.equal(output.verified, false);
+  assert.equal(output.thinkingRequested, false);
+  assert.equal(prompt.think, false, "the caller cannot enable reasoning");
   const evidence = JSON.parse(prompt.messages[1].content).providedEvidence;
   assert.ok(evidence.length);
   assert.ok(evidence.every((e) => !("raw" in e)));
@@ -80,6 +84,13 @@ test("invalid citations are rejected rather than displayed as supported", async 
   });
   assert.equal(r.status, 503);
   assert.match((await r.json()).error, /evidence/);
+});
+
+test('citation groups accept only supplied IDs and reject unknown or ambiguous references', () => {
+  assert.deepEqual(evidenceCitations('Events [E17, E19] and [E20][E17].', ['E17','E19','E20']), ['E17','E19','E20']);
+  assert.throws(() => evidenceCitations('Events [E17, E999].', ['E17']), /invalid evidence/);
+  assert.throws(() => evidenceCitations('Events [E17-E19].', ['E17','E19']), /format/);
+  assert.throws(() => evidenceCitations('No citations.', ['E17']), /missing/);
 });
 test("uninstalled models and fabricated alerts are rejected", async (t) => {
   const url = await app(t, async () => Response.json({ models: [] }));
