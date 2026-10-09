@@ -1,0 +1,15 @@
+{
+  "name": "signaldesk-soc-assistant",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "evaluate": "node scripts/evaluate.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

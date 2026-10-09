@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="An evidence-first workspace for investigating authentication logs."
+    />
+    <title>SignalDesk · SOC Assistant</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23151920'/%3E%3Cpath d='M6 17h5l3-8 5 15 3-7h4' fill='none' stroke='%23ffc66d' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="rail">
+        <a class="brand" href="#" aria-label="SignalDesk home"
+          ><span class="brandmark">S</span
+          ><span>SignalDesk<small>SOC ASSISTANT</small></span></a
+        >
+        <div class="rail-label">WORKSPACE</div>
+        <button
+          class="nav active"
+          data-view="investigate"
+          aria-label="Investigate"
+        >
+          ◎ <span>Investigate</span></button
+        ><button class="nav" data-view="evaluation" aria-label="Evaluation">
+          ▥ <span>Evaluation</span></button
+        ><button class="nav" data-view="rules" aria-label="Detection rules">
+          ≋ <span>Detection rules</span></button
+        ><button class="nav" data-view="guide" aria-label="Getting started">
+          ◇ <span>Getting started</span>
+        </button>
+        <div class="rail-bottom">
+          <span class="small-label">PROCESSING</span
+          ><strong>On your device</strong>
+          <p>Log analysis stays in this browser.</p>
+          <span class="version">Portfolio edition · v1.1</span>
+        </div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <span
+            >WORKSPACE <span class="slash">/</span>
+            <strong id="breadcrumb">Investigation</strong></span
+          ><button class="quiet" id="ai-settings">Local AI settings</button>
+        </header>
+        <nav class="mobile-nav" aria-label="Workspace navigation">
+          <button data-view="investigate" class="active">Investigate</button
+          ><button data-view="evaluation">Evaluation</button
+          ><button data-view="rules">Rules</button
+          ><button data-view="guide">Guide</button>
+        </nav>
+        <section class="page" id="investigate-view">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow">AUTHENTICATION INTELLIGENCE</div>
+              <h1>Every alert. The evidence behind it.</h1>
+              <p>
+                Find suspicious sign-in patterns and understand what deserves a
+                closer look.
+              </p>
+            </div>
+            <div class="report-actions">
+              <select id="report-format" aria-label="Report format">
+                <option value="json">JSON report</option>
+                <option value="markdown">Readable report</option></select
+              ><button class="secondary" id="export" disabled>
+                Export report
+              </button>
+            </div>
+          </div>
+          <div class="input-panel">
+            <div class="input-title">
+              <div>
+                <h2>Start with your logs</h2>
+                <p>JSON, JSONL, CSV, or ISO-dated SSH logs · up to 2 MB</p>
+              </div>
+              <span class="tag">LOCAL ANALYSIS</span>
+            </div>
+            <textarea
+              id="log-input"
+              aria-label="Paste authentication logs"
+              spellcheck="false"
+              placeholder='Paste logs here, or try a sample below…&#10;{"timestamp":"2026-10-09T09:00:00Z","source_ip":"192.0.2.10","username":"admin","status":"failure"}'
+            ></textarea>
+            <div class="input-actions">
+              <div>
+                <button class="secondary" id="upload">Upload file</button
+                ><input
+                  id="file"
+                  type="file"
+                  accept=".json,.jsonl,.ndjson,.csv,.log,.txt"
+                  hidden
+                /><select id="sample" aria-label="Choose a sample">
+                  <option value="mixed">Mixed activity demo</option>
+                  <option value="normal">Normal sign-ins</option>
+                  <option value="spray">Password spray demo</option></select
+                ><button class="quiet" id="load-sample">Load sample</button>
+              </div>
+              <button class="primary" id="analyze">Analyze logs</button>
+            </div>
+            <p id="input-note" class="input-note">
+              Use a sample to explore. Logs are held in memory and cleared when
+              you reload.
+            </p>
+          </div>
+          <div id="status" role="status" aria-live="polite"></div>
+          <div id="results" hidden>
+            <div class="stats" id="stats"></div>
+            <details id="data-quality" class="data-quality" hidden></details>
+            <section
+              id="timeline"
+              class="timeline-panel"
+              aria-label="Authentication activity timeline"
+            ></section>
+            <div class="workspace-grid">
+              <section class="alerts-section">
+                <div class="section-heading">
+                  <h2>Investigation queue <span id="alert-count"></span></h2>
+                  <select id="severity" aria-label="Filter alerts by severity">
+                    <option value="all">All severities</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                  </select>
+                </div>
+                <div id="alerts"></div>
+              </section>
+              <section
+                class="detail"
+                id="detail"
+                aria-label="Selected alert details"
+              ></section>
+            </div>
+            <section class="events-panel">
+              <div class="section-heading">
+                <h2>Event explorer <span id="event-count"></span></h2>
+                <input
+                  id="event-search"
+                  type="search"
+                  placeholder="Search IP, user, outcome…"
+                  aria-label="Search events"
+                />
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Evidence</th>
+                      <th>Time (UTC)</th>
+                      <th>Source IP</th>
+                      <th>User</th>
+                      <th>Outcome</th>
+                    </tr>
+                  </thead>
+                  <tbody id="events"></tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span id="page-info"></span>
+                <div>
+                  <button class="quiet" id="prev">Previous</button
+                  ><button class="quiet" id="next">Next</button>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div id="empty" class="welcome">
+            <span class="welcome-symbol">◎</span>
+            <div>
+              <h2>A clear path from signal to understanding.</h2>
+              <p>
+                Analyze a sample to see alerts, readable explanations, and the
+                exact events that triggered each rule.
+              </p>
+            </div>
+            <span class="welcome-label"
+              >01 IMPORT &nbsp; 02 DETECT &nbsp; 03 INVESTIGATE</span
+            >
+          </div>
+        </section>
+        <section class="page" id="evaluation-view" hidden>
+          <div class="eyebrow">MEASURE WHAT WORKS</div>
+          <h1>Results you can inspect.</h1>
+          <p class="intro">
+            Compare detected rule labels with labelled scenarios. Examine false
+            alarms and missed patterns before making performance claims.
+          </p>
+          <div class="evaluation-notice">
+            <strong>Development examples, not research validation.</strong>
+            <p>
+              The included suite is synthetic and contains a known false
+              positive and a missed slow attempt. Use a separate, independently
+              labelled set for your final portfolio evaluation. This screen does
+              not measure LLM explanation quality.
+            </p>
+          </div>
+          <section class="input-panel">
+            <h2 id="eval-name"></h2>
+            <div class="evaluation-actions">
+              <button id="eval-run" class="primary">Run evaluation</button
+              ><button id="eval-upload" class="secondary">
+                Import labelled cases</button
+              ><input id="eval-file" type="file" accept=".json" hidden /><button
+                id="eval-example"
+                class="quiet"
+              >
+                Download example format</button
+              ><button id="eval-reset" class="quiet">
+                Use development examples
+              </button>
+            </div>
+            <p class="muted">
+              Format: a name and cases with id, name, events, expected rule IDs,
+              and optional notes. Up to 100 cases / 2 MB.
+            </p>
+            <p id="eval-status" role="status"></p>
+          </section>
+          <section id="eval-summary" hidden>
+            <div id="eval-metrics" class="stats"></div>
+            <div class="events-panel">
+              <div class="section-heading">
+                <h2>Per-rule results</h2>
+                <button id="eval-export" class="secondary" disabled>
+                  Export evaluation
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Rule</th>
+                      <th>True positives</th>
+                      <th>False positives</th>
+                      <th>Misses</th>
+                      <th>Precision</th>
+                      <th>Recall</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eval-rule-results"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="events-panel">
+              <h2>Inspect every case</h2>
+              <div class="table-wrap">
+                <table class="case-table">
+                  <thead>
+                    <tr>
+                      <th>Scenario</th>
+                      <th>Expected labels</th>
+                      <th>Detected labels</th>
+                      <th>Result</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eval-case-results"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </section>
+        <section class="page" id="rules-view" hidden>
+          <div class="eyebrow">TRANSPARENT BY DESIGN</div>
+          <h1>Know what triggers an alert.</h1>
+          <p class="intro">
+            These fixed rules flag patterns for review. They do not establish
+            that an account was compromised.
+          </p>
+          <div id="rule-list" class="rule-list"></div>
+        </section>
+        <section class="page" id="guide-view" hidden>
+          <div class="eyebrow">YOUR FIRST INVESTIGATION</div>
+          <h1>From a log line to a finding.</h1>
+          <div class="guide-grid">
+            <article>
+              <span class="step">01</span>
+              <h2>Bring the evidence</h2>
+              <p>
+                Load a sample or upload authentication events. Each valid event
+                receives an evidence ID. Invalid records are reported, never
+                silently counted as valid.
+              </p>
+              <pre>
+{
+  "timestamp": "2026-10-09T09:00:00Z",
+  "source_ip": "192.0.2.10",
+  "username": "admin",
+  "status": "failure"
+}</pre
+              >
+              <p>
+                Use ISO timestamps with a timezone. CSV uses the same column
+                names. SSH text must begin with an ISO timestamp; yearless
+                syslog is rejected.
+              </p>
+            </article>
+            <article>
+              <span class="step">02</span>
+              <h2>Review the pattern</h2>
+              <p>
+                Inspect the rule, its time window, and its supporting events.
+                Repeated failed logins can also come from a forgotten password
+                or a misconfigured service.
+              </p>
+              <p>
+                “No matching alerts” only means these three rules found nothing.
+                This app does not evaluate every kind of security threat.
+              </p>
+            </article>
+            <article>
+              <span class="step">03</span>
+              <h2>Explain and investigate</h2>
+              <p>
+                Built-in explanations work immediately. Optional Ollama support
+                runs an AI model on your computer through the companion server.
+              </p>
+              <p>
+                AI text is an unverified interpretation. Check it against the
+                evidence before drawing conclusions. This assistant does not
+                execute commands or take response actions.
+              </p>
+            </article>
+          </div>
+        </section>
+        <footer>
+          SignalDesk <span>Evidence before assumptions.</span
+          ><span class="footer-right">Local analysis · No billing</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="settings">
+      <div class="modal-heading">
+        <h2>Local AI, optional.</h2>
+        <button class="quiet" id="close-settings" aria-label="Close settings">
+          ✕
+        </button>
+      </div>
+      <p>
+        Built-in explanations are always available. For model-generated
+        explanations, run this app locally with Ollama.
+      </p>
+      <ol>
+        <li>
+          Install Ollama and download a model, for example
+          <code>ollama pull qwen3:1.7b</code>.
+        </li>
+        <li>Run <code>npm start</code> in the application folder.</li>
+        <li>
+          Open <code>http://127.0.0.1:4173</code> and choose an installed model
+          below.
+        </li>
+      </ol>
+      <p class="muted">
+        The model runs on your hardware. No API key or paid service is required.
+        Only the selected alert's normalized evidence is sent to your local
+        model.
+      </p>
+      <label for="model">Installed model</label>
+      <div class="model-row">
+        <select id="model">
+          <option value="">Check connection first</option></select
+        ><button id="check-ai" class="secondary">Check connection</button>
+      </div>
+      <p id="ai-status" role="status">Local AI has not been checked.</p>
+    </dialog>
+    <script type="module" src="app.mjs"></script>
+  </body>
+</html>
